@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jibu"
+version = "0.1.0-dev"
+description = "AI civic assistant for Kenya — your rights in plain Kiswahili and English"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Gabriel Mahia", email = "contact@aikungfu.dev" }]
+keywords = ["kenya", "civic", "legal", "rights", "kiswahili", "africa", "ai"]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
