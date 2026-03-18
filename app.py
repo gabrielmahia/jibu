@@ -91,29 +91,99 @@ def _get_key():
     return os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
 
 def _call_gemini(system: str, user: str, api_key: str) -> str:
+    # Inline system prompt — same pattern as the working catholic assistant.
+    # system_instruction block is rejected by some model versions.
+    full_prompt = f"{system}\n\nUser question: {user}\n\nAnswer:"
     payload = {
-        "system_instruction": {"parts": [{"text": system}]},
-        "contents": [{"parts": [{"text": user}], "role": "user"}],
+        "contents": [{"parts": [{"text": full_prompt}]}],
         "generationConfig": {"maxOutputTokens": 800, "temperature": 0.3},
     }
-    url = f"{_BASE}/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-    body = json.dumps(payload).encode()
-    req = urllib.request.Request(url, data=body,
-                                  headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=25) as r:
-            data = json.loads(r.read())
-        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except urllib.error.HTTPError as e:
-        err = e.read()[:200].decode("utf-8", "ignore")
-        if e.code == 429:
-            return "_quota_"
-        return f"_error_{err}"
-    except Exception as e:
-        return f"_error_{str(e)[:80]}"
+    # Try gemini-2.0-flash first, fall back to 1.5-flash
+    models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
+    last_err = ""
+    for model in models:
+        url = f"{_BASE}/v1beta/models/{model}:generateContent?key={api_key}"
+        body = json.dumps(payload).encode()
+        req = urllib.request.Request(url, data=body,
+                                      headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=25) as r:
+                data = json.loads(r.read())
+            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        except urllib.error.HTTPError as e:
+            err = e.read()[:300].decode("utf-8", "ignore")
+            if e.code == 429:
+                continue  # try next model
+            if e.code == 404:
+                continue  # model not available, try next
+            return f"_error_{e.code}:{err}"
+        except Exception as e:
+            last_err = str(e)[:80]
+            continue
+    # All models tried
+    if last_err:
+        return f"_error_{last_err}"
+    return "_quota_"
 
 # ── Static fallback answers ───────────────────────────────────────────────────
 _FALLBACKS = {
+    # Identity / what is this
+    "what are you|who are you|what is jibu|nini wewe|wewe ni nani": (
+        "I am Jibu — a civic information assistant for Kenya. I can answer questions "
+        "about your rights under Kenyan law: labour rights, land rights, arrest rights, "
+        "consumer protection, business registration, and government services. "
+        "I provide general legal information in English and Kiswahili. "
+        "For advice on your specific situation, speak with a lawyer or contact "
+        "Kituo cha Sheria: +254 20 387 4785 (free legal aid)."
+    ),
+    # Employment
+    "fire|dismiss|terminate|redundan|unfair|nafukuzwa|without notice|bila notisi": (
+        "Under Kenya's Employment Act (Cap 226), your employer must give written notice "
+        "before terminating your contract. The minimum notice period depends on your pay cycle: "
+        "1 month if paid monthly, 2 weeks if paid fortnightly, 1 week if paid weekly. "
+        "Termination without notice is only lawful for gross misconduct — and even then "
+        "the employer must follow a fair disciplinary process (Employment Act Section 41). "
+        "If you are dismissed unfairly, you can file a complaint with the "
+        "Employment and Labour Relations Court or the Ministry of Labour.\n\n"
+        "_This is general legal information. For your specific case, contact "
+        "Kituo cha Sheria: +254 20 387 4785._"
+    ),
+    # Business registration
+    "register a business|biashara|usajili|sole proprietor|limited company|register my business": (
+        "To register a business in Kenya:\n"
+        "**Sole proprietorship or partnership:** Register at the Registrar of Companies "
+        "(eCitizen portal — ecitizen.go.ke). Cost: KES 950. Takes 1–3 days.\n"
+        "**Limited company:** Register via eCitizen. Cost: ~KES 10,650. Takes 3–5 days. "
+        "Requires a Memorandum and Articles of Association.\n"
+        "**Cooperative society:** Register with the Commissioner for Cooperatives, "
+        "Ministry of Trade. Minimum 10 members required.\n\n"
+        "All businesses need a Single Business Permit from your county government. "
+        "(Source: Companies Act 2015, Business Registration Service Act 2015)\n\n"
+        "_For specific advice on the right structure for your business, contact "
+        "the Business Registration Service at businessregistration.go.ke._"
+    ),
+    # NHIF
+    "nhif|health insurance|bima ya afya|sha |social health": (
+        "NHIF (National Hospital Insurance Fund) — now being transitioned to SHA "
+        "(Social Health Authority) — covers inpatient and outpatient treatment "
+        "at accredited public and private hospitals. "
+        "Contributions are mandatory for formal employees (deducted from salary) "
+        "and voluntary for self-employed and informal workers. "
+        "Your card covers you, your spouse, and all children under 18. "
+        "(Source: NHIF Act Cap 255, Social Health Insurance Act 2023)\n\n"
+        "_Check your cover and accredited facilities at nhif.or.ke or sha.go.ke._"
+    ),
+    # Swahili arrest
+    "haki zangu|ninakamatwa|nikikamatwa|polisi wanin": (
+        "Unakamatwa Kenya, una haki hizi (Katiba ya Kenya 2010, Ibara 49):\n"
+        "• Kuambiwa sababu ya kukamatwa mara moja\n"
+        "• Kukaa kimya (kile unachosema kinaweza kutumika dhidi yako)\n"
+        "• Kuwasiliana na mwanasheria mara moja\n"
+        "• Kupelekwa mahakamani ndani ya masaa 24\n"
+        "• Kutoteswa wala kudhalilishwa (Ibara 25)\n\n"
+        "Ukihitaji msaada wa kisheria bure, wasiliana na "
+        "Kituo cha Sheria: +254 20 387 4785."
+    ),
     "minimum wage": (
         "Under Kenya's Labour Laws (Regulation of Wages) Order, the national minimum wage "
         "varies by sector and region. General labourers in Nairobi (2024): ~KES 15,201/month. "
@@ -130,7 +200,7 @@ _FALLBACKS = {
         "_Hii ni habari ya kisheria kwa ujumla, si ushauri maalum kwa hali yako. "
         "Wasiliana na ofisi ya Wizara ya Kazi au Kituo cha Sheria._"
     ),
-    "eviction|kufukuzwa": (
+    "evict|court order|landlord|tenant|kufukuzwa|amri ya mahakama": (
         "Under the Land Act 2012 and the Prevention, Protection and Assistance to "
         "Internally Displaced Persons Act (2012), you cannot be evicted without:\n"
         "1. Written notice (minimum 3 months for residential tenants under the Landlord "
@@ -142,7 +212,7 @@ _FALLBACKS = {
         "Police-assisted evictions without a court order are illegal.\n\n"
         "_Speak with Kituo cha Sheria (020 387 4785) for specific advice._"
     ),
-    "arrest|rights when arrested|kukamatwa": (
+    "arrest|arrested|kukamatwa|rights when|police|bail|kukamatwa": (
         "When arrested in Kenya, you have the following rights "
         "(Constitution of Kenya 2010, Article 49):\n"
         "• Be informed promptly of the reason for arrest\n"
@@ -253,7 +323,10 @@ if pending:
                 "For urgent help: Kituo cha Sheria +254 20 387 4785."
             )
         elif raw.startswith("_error_"):
-            reply = _static_response(pending) or "We're having a brief connection issue — please try again in a moment."
+            reply = _static_response(pending) or (
+                "Jibu is having a moment — please try again shortly. "
+                "For urgent help: Kituo cha Sheria +254 20 387 4785."
+            )
         else:
             reply = raw
     else:
@@ -302,7 +375,10 @@ if send and user_input.strip():
                 "Kituo cha Sheria: +254 20 387 4785 (free legal aid)."
             )
         elif raw.startswith("_error_"):
-            reply = _static_response(question) or "We're having a brief connection issue — please try again in a moment."
+            reply = _static_response(question) or (
+                "Jibu is having a moment — please try again shortly. "
+                "For urgent help: Kituo cha Sheria +254 20 387 4785."
+            )
         else:
             reply = raw
     else:
