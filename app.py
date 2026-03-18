@@ -249,11 +249,11 @@ if pending:
             raw = _call_gemini(system, pending, api_key)
         if raw.startswith("_quota_"):
             reply = _static_response(pending) or (
-                "The service is busy. Please try again shortly. "
-                "For immediate help: Kituo cha Sheria +254 20 387 4785"
+                "Jibu is taking a short break. Please try again in a moment. "
+                "For urgent help: Kituo cha Sheria +254 20 387 4785."
             )
         elif raw.startswith("_error_"):
-            reply = _static_response(pending) or "Unable to connect — try again shortly."
+            reply = _static_response(pending) or "We're having a brief connection issue — please try again in a moment."
         else:
             reply = raw
     else:
@@ -298,20 +298,20 @@ if send and user_input.strip():
             raw = _call_gemini(system, question, api_key)
         if raw.startswith("_quota_"):
             reply = _static_response(question) or (
-                "The service is temporarily at capacity. "
-                "For immediate help: Kituo cha Sheria +254 20 387 4785"
+                "Jibu is taking a short break. For immediate help, contact "
+                "Kituo cha Sheria: +254 20 387 4785 (free legal aid)."
             )
         elif raw.startswith("_error_"):
-            reply = _static_response(question) or "Unable to connect — try again shortly."
+            reply = _static_response(question) or "We're having a brief connection issue — please try again in a moment."
         else:
             reply = raw
     else:
         reply = _static_response(question) or (
-            "**Jibu** can answer questions about Kenyan civic rights in English and Kiswahili. "
-            "For immediate legal help, contact:\n\n"
+            "Jibu answers questions about Kenyan civic rights in English and Kiswahili. "
+            "The AI assistant is being set up — for immediate legal help:\n\n"
             "- **Kituo cha Sheria**: +254 20 387 4785 (free legal aid)\n"
             "- **FIDA Kenya**: +254 20 271 0705 (women's legal rights)\n"
-            "- **KNHCR**: 020 271 2020 (human rights)\n"
+            "- **Kenya National Commission on Human Rights**: 020 271 2020\n"
             "- **Legal Resources Foundation**: 020 241 1322"
         )
 
