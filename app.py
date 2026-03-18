@@ -403,6 +403,25 @@ if st.session_state.messages:
         st.session_state.input_counter += 1
         st.rerun()
 
+# ── Live legal signal ─────────────────────────────────────────────────────
+_legal = fetch_legal_updates()
+_kes_j = fetch_kes_rate_jibu()
+
+if _kes_j.get("live"):
+    st.caption(f"📡 Diaspora rate: 1 USD = {_kes_j['kes']} KES · open.er-api.com")
+
+if _legal:
+    with st.expander(f"📡 Latest: LSK · FIDA · Judiciary ({len(_legal)} recent)", expanded=False):
+        for _li in _legal:
+            _src_icon = {"LSK": "🔵", "FIDA Kenya": "🟣", "Judiciary": "⚫"}.get(_li["source"], "⚪")
+            st.markdown(
+                f"{_src_icon} **{_li['source']}** · *{_li['date']}*  \n"
+                f"[{_li['title'][:80]}{'…' if len(_li['title'])>80 else ''}]({_li['link']})"
+            )
+            if _li["summary"]:
+                st.caption(_li["summary"][:120] + "…")
+            st.divider()
+
 st.divider()
 st.markdown("""
 **Legal aid organisations:**
