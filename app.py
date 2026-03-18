@@ -17,10 +17,54 @@ import os
 import json
 import urllib.request
 import urllib.error
+import xml.etree.ElementTree as ET
+import re as _re
 import streamlit as st
 
 from jibu.llm.language import detect_or_default, Language
 from jibu.llm.prompt import build_system_prompt
+
+
+@st.cache_data(ttl=7200)
+def fetch_legal_updates():
+    """Latest publications from LSK, FIDA Kenya, and Kenya Judiciary."""
+    sources = {
+        "LSK":        "https://www.lsk.or.ke/feed/",
+        "FIDA Kenya": "https://fidakenya.org/feed/",
+        "Judiciary":  "https://judiciary.go.ke/feed/",
+    }
+    all_items = []
+    for source, url in sources.items():
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "jibu-kenya/1.0"})
+            with urllib.request.urlopen(req, timeout=8) as r:
+                root = ET.fromstring(r.read())
+            for item in root.findall(".//item")[:3]:
+                title = item.findtext("title", "").strip()
+                link  = item.findtext("link",  "").strip()
+                date  = item.findtext("pubDate", "").strip()[:16]
+                desc  = _re.sub(r"<[^>]+>", "", item.findtext("description", "")).strip()[:140]
+                if title:
+                    all_items.append({"source": source, "title": title,
+                                       "link": link, "date": date, "summary": desc})
+        except Exception:
+            pass
+    return sorted(all_items, key=lambda x: x["date"], reverse=True)[:8]
+
+
+@st.cache_data(ttl=3600)
+def fetch_kes_rate_jibu():
+    """Live KES rate for diaspora users accessing Jibu from abroad."""
+    try:
+        with urllib.request.urlopen(
+            "https://open.er-api.com/v6/latest/USD", timeout=5
+        ) as r:
+            d = json.loads(r.read())
+        return {"kes": round(d["rates"]["KES"], 2),
+                "updated": d.get("time_last_update_utc", "")[:16], "live": True}
+    except Exception:
+        return {"live": False}
+
 
 st.set_page_config(
     page_title="Jibu — Know Your Rights Kenya",
