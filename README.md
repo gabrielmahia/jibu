@@ -5,6 +5,7 @@
 [![Status](https://img.shields.io/badge/status-early%20development-orange)](#roadmap)
 [![License](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-red)](LICENSE)
 [![Live Data](https://img.shields.io/badge/Live%20Data-LSK%20%C2%B7%20FIDA%20%C2%B7%20Judiciary%20%C2%B7%20open.er-api.com-00b4d8)](#jibu)
+[![Live App](https://img.shields.io/badge/Live%20App-jibuyangu.streamlit.app-brightgreen)](https://jibuyangu.streamlit.app)
 
 > **jibu** /jíbu/ — *Kiswahili*: answer, response.
 
@@ -13,6 +14,9 @@ The information gap between what Kenyan citizens are entitled to and what they k
 Jibu is an AI assistant that gives Kenyans plain-language answers about their rights and government services, in Kiswahili and English.
 
 ---
+
+
+**Live app:** https://jibuyangu.streamlit.app
 
 ## The problem
 
