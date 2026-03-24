@@ -143,6 +143,20 @@ html,body,[class*="css"]{font-family:'IBM Plex Sans',sans-serif;}
     [data-theme="dark"] [data-testid="stMetricDelta"],
     .stApp[data-theme="dark"] [data-testid="stMetricDelta"] { color: #cccccc !important; }
 
+
+    @media (prefers-color-scheme: dark) {
+        .topic-chip    { background: #1a2535 !important; color: #99b8d8 !important; border-color: #2d4a6e !important; }
+        .msg-jibu      { background: #1a2535 !important; border-color: #4a7aaa !important; color: #d0e8ff !important; }
+        .msg-user      { background: #1a2535 !important; color: #f0f0f0 !important; }
+        .source-tag    { background: #0d2518 !important; color: #7dcea0 !important; }
+        .disclaimer-box { background: #2d2010 !important; border-color: #f59e0b !important; color: #f0c060 !important; }
+    }
+    [data-theme="dark"] .topic-chip,    .stApp[data-theme="dark"] .topic-chip     { background: #1a2535 !important; color: #99b8d8 !important; border-color: #2d4a6e !important; }
+    [data-theme="dark"] .msg-jibu,      .stApp[data-theme="dark"] .msg-jibu       { background: #1a2535 !important; border-color: #4a7aaa !important; color: #d0e8ff !important; }
+    [data-theme="dark"] .msg-user,      .stApp[data-theme="dark"] .msg-user       { background: #1a2535 !important; color: #f0f0f0 !important; }
+    [data-theme="dark"] .source-tag,    .stApp[data-theme="dark"] .source-tag     { background: #0d2518 !important; color: #7dcea0 !important; }
+    [data-theme="dark"] .disclaimer-box, .stApp[data-theme="dark"] .disclaimer-box { background: #2d2010 !important; border-color: #f59e0b !important; color: #f0c060 !important; }
+
 </style>
 """, unsafe_allow_html=True)
 
