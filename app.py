@@ -21,7 +21,7 @@ import xml.etree.ElementTree as ET
 import re as _re
 import streamlit as st
 
-from jibu.llm.language import detect_or_default, Language
+from jibu.llm.language import detect_or_default
 from jibu.llm.prompt import build_system_prompt
 
 
@@ -120,6 +120,12 @@ html,body,[class*="css"]{font-family:'IBM Plex Sans',sans-serif;}
   .jibu-header h1{font-size:1.4rem!important;}
   .stButton>button{width:100%!important;min-height:48px!important;}
 }
+    @media (max-width: 480px) {
+        h1 { font-size: 1.4rem !important; }
+        h2 { font-size: 1.15rem !important; }
+        [data-testid="stMetricValue"] { font-size: 1rem !important; }
+        .stButton > button { min-height: 52px !important; font-size: 0.95rem !important; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -129,7 +135,7 @@ _BASE = "https://generativelanguage.googleapis.com"
 def _get_key():
     try:
         k = st.secrets.get("GOOGLE_API_KEY") or st.secrets.get("GEMINI_API_KEY")
-        if k: return k
+        if k: return k  # noqa: E701
     except Exception:
         pass
     return os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
