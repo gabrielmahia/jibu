@@ -1,7 +1,6 @@
 """Tests for jibu — language detection and prompt construction."""
 from __future__ import annotations
 
-import pytest
 from jibu.llm.language import Language, detect, detect_or_default
 from jibu.llm.prompt import build_system_prompt
 
@@ -62,11 +61,11 @@ class TestPromptConstruction:
 
 def test_fetch_kes_rate_jibu_returns_dict():
     """fetch_kes_rate_jibu returns expected keys regardless of network."""
-    import sys, os
+    import sys
     sys.path.insert(0, "/tmp/new_jibu")
     # Patch urllib to avoid real network calls in CI
-    import unittest.mock as mock
     import json
+    from unittest import mock
 
     fake_response = json.dumps({
         "rates": {"KES": 129.33, "GBP": 0.75, "EUR": 0.87},
@@ -86,12 +85,10 @@ def test_fetch_legal_updates_returns_list():
     """fetch_legal_updates returns a list (empty on failure is fine)."""
     import sys
     sys.path.insert(0, "/tmp/new_jibu")
-    import unittest.mock as mock
+    from unittest import mock
     with mock.patch("urllib.request.urlopen", side_effect=Exception("no network")):
         from app import fetch_legal_updates
         # When all feeds fail, should return empty list gracefully
-        try:
-            result = fetch_legal_updates.__wrapped__() if hasattr(fetch_legal_updates, "__wrapped__") else []
-        except Exception:
-            result = []
+        fn = getattr(fetch_legal_updates, "__wrapped__", fetch_legal_updates)
+        result = fn()  # any exception fails this test: the function must degrade gracefully on its own
     assert isinstance(result, list)
