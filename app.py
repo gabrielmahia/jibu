@@ -13,12 +13,13 @@ speak with a lawyer or contact Kituo cha Sheria (+254 20 387 4785).
 """
 from __future__ import annotations
 
-import os
 import json
-import urllib.request
-import urllib.error
-import xml.etree.ElementTree as ET
+import os
 import re as _re
+import urllib.error
+import urllib.request
+import xml.etree.ElementTree as ET
+
 import streamlit as st
 
 from jibu.llm.language import detect_or_default
@@ -47,7 +48,7 @@ def fetch_legal_updates():
                 if title:
                     all_items.append({"source": source, "title": title,
                                        "link": link, "date": date, "summary": desc})
-        except Exception:
+        except Exception:  # noqa: BLE001, S110 - graceful fallback: the page keeps working when an outside source or optional file is unavailable
             pass
     return sorted(all_items, key=lambda x: x["date"], reverse=True)[:8]
 
@@ -62,7 +63,7 @@ def fetch_kes_rate_jibu():
             d = json.loads(r.read())
         return {"kes": round(d["rates"]["KES"], 2),
                 "updated": d.get("time_last_update_utc", "")[:16], "live": True}
-    except Exception:
+    except Exception:  # noqa: BLE001 - graceful fallback: the page keeps working when an outside source or optional file is unavailable
         return {"live": False}
 
 
@@ -166,8 +167,8 @@ _BASE = "https://generativelanguage.googleapis.com"
 def _get_key():
     try:
         k = st.secrets.get("GOOGLE_API_KEY") or st.secrets.get("GEMINI_API_KEY")
-        if k: return k  # noqa: E701
-    except Exception:
+        if k: return k
+    except Exception:  # noqa: BLE001, S110 - graceful fallback: the page keeps working when an outside source or optional file is unavailable
         pass
     return os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
 
@@ -198,7 +199,7 @@ def _call_gemini(system: str, user: str, api_key: str) -> str:
             if e.code == 404:
                 continue  # model not available, try next
             return f"_error_{e.code}:{err}"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - graceful fallback: the page keeps working when an outside source or optional file is unavailable
             last_err = str(e)[:80]
             continue
     # All models tried
@@ -478,11 +479,10 @@ if send and user_input.strip():
     st.session_state.input_counter += 1
     st.rerun()
 
-if st.session_state.messages:
-    if st.button("Clear conversation", key="clear"):
-        st.session_state.messages = []
-        st.session_state.input_counter += 1
-        st.rerun()
+if st.session_state.messages and st.button("Clear conversation", key="clear"):
+    st.session_state.messages = []
+    st.session_state.input_counter += 1
+    st.rerun()
 
 # ── Live legal signal ─────────────────────────────────────────────────────
 _legal = fetch_legal_updates()
@@ -518,7 +518,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown(
         "**Was this useful?**\n\n"
-        f"[:pencil: Leave feedback](https://docs.google.com/forms/d/e/1FAIpQLSff_cjR102HNUeYU428ROv56TScLBzsQRc1JTwY4wGizvTQKw/viewform) (2 min)\n\n"
+        "[:pencil: Leave feedback](https://docs.google.com/forms/d/e/1FAIpQLSff_cjR102HNUeYU428ROv56TScLBzsQRc1JTwY4wGizvTQKw/viewform) (2 min)\n\n"
         "[:bug: Report a bug](https://github.com/gabrielmahia/jibu/issues/new)\n\n"
         "---\n"
         "*Built by [Gabriel Mahia](https://aikungfu.dev)*\n\n"
