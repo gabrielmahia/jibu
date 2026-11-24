@@ -10,7 +10,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Gabriel Mahia", email = "contact@aikungfu.dev" }]
 keywords = ["kenya", "civic", "legal", "rights", "kiswahili", "africa", "ai"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
