@@ -510,7 +510,7 @@ st.markdown("""
 [FIDA Kenya](https://fidakenya.org) · 020 271 0705 &nbsp;|&nbsp;
 [Legal Resources Foundation](https://lrfkenya.org) · 020 241 1322
 
-Jibu · CC BY-NC-ND 4.0 · contact@aikungfu.dev · Not a substitute for legal advice
+Jibu · PolyForm Noncommercial 1.0.0 · contact@aikungfu.dev · Not a substitute for legal advice
 """)
 
 # -- Feedback sidebar ---------------------------------------------------------
