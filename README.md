@@ -3,7 +3,7 @@
 **AI civic assistant for Kenya.**
 
 [![Status](https://img.shields.io/badge/status-early%20development-orange)](#roadmap)
-[![License](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-red)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE)
 [![Live Data](https://img.shields.io/badge/Live%20Data-LSK%20%C2%B7%20FIDA%20%C2%B7%20Judiciary%20%C2%B7%20open.er-api.com-00b4d8)](#jibu)
 [![Live App](https://img.shields.io/badge/Live%20App-jibuyangu.streamlit.app-brightgreen)](https://jibuyangu.streamlit.app)
 
@@ -144,7 +144,7 @@ Contact: contact@aikungfu.dev
 
 ## License
 
-CC BY-NC-ND 4.0. Commercial licensing: contact@aikungfu.dev
+PolyForm Noncommercial 1.0.0. Commercial licensing: contact@aikungfu.dev
 
 ---
 
